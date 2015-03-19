@@ -17,48 +17,56 @@
 
 namespace HTTP_Proxy {
 
-typedef struct _HTTP_Proxy__isset {
-  _HTTP_Proxy__isset() : URL(false) {}
-  bool URL;
-} _HTTP_Proxy__isset;
+typedef struct _HTTPProxy__isset {
+  _HTTPProxy__isset() : document(false), result_code(false) {}
+  bool document;
+  bool result_code;
+} _HTTPProxy__isset;
 
-class HTTP_Proxy {
+class HTTPProxy {
  public:
 
-  static const char* ascii_fingerprint; // = "5EA2D527ECA3BA20C77AFC023EE8C05F";
-  static const uint8_t binary_fingerprint[16]; // = {0x5E,0xA2,0xD5,0x27,0xEC,0xA3,0xBA,0x20,0xC7,0x7A,0xFC,0x02,0x3E,0xE8,0xC0,0x5F};
+  static const char* ascii_fingerprint; // = "EEBC915CE44901401D881E6091423036";
+  static const uint8_t binary_fingerprint[16]; // = {0xEE,0xBC,0x91,0x5C,0xE4,0x49,0x01,0x40,0x1D,0x88,0x1E,0x60,0x91,0x42,0x30,0x36};
 
-  HTTP_Proxy() {
+  HTTPProxy() : document(), result_code(0) {
   }
 
-  virtual ~HTTP_Proxy() throw() {}
+  virtual ~HTTPProxy() throw() {}
 
-  std::map<std::string, std::string>  URL;
+  std::string document;
+  int32_t result_code;
 
-  _HTTP_Proxy__isset __isset;
+  _HTTPProxy__isset __isset;
 
-  void __set_URL(const std::map<std::string, std::string> & val) {
-    URL = val;
+  void __set_document(const std::string& val) {
+    document = val;
   }
 
-  bool operator == (const HTTP_Proxy & rhs) const
+  void __set_result_code(const int32_t val) {
+    result_code = val;
+  }
+
+  bool operator == (const HTTPProxy & rhs) const
   {
-    if (!(URL == rhs.URL))
+    if (!(document == rhs.document))
+      return false;
+    if (!(result_code == rhs.result_code))
       return false;
     return true;
   }
-  bool operator != (const HTTP_Proxy &rhs) const {
+  bool operator != (const HTTPProxy &rhs) const {
     return !(*this == rhs);
   }
 
-  bool operator < (const HTTP_Proxy & ) const;
+  bool operator < (const HTTPProxy & ) const;
 
   uint32_t read(::apache::thrift::protocol::TProtocol* iprot);
   uint32_t write(::apache::thrift::protocol::TProtocol* oprot) const;
 
 };
 
-void swap(HTTP_Proxy &a, HTTP_Proxy &b);
+void swap(HTTPProxy &a, HTTPProxy &b);
 
 } // namespace
 

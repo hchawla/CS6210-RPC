@@ -1,10 +1,15 @@
 namespace cpp HTTP_Proxy
 
-struct HTTP_Proxy
+struct HTTPProxy
 {
-	1:map<string,string> URL
+	1:binary document,
+	2:i32 result_code
 }
-service fetch_URL
+
+service HttpProxy
 {
-	HTTP_Proxy get(1:string URL)
+	HTTPProxy get(1:string URL)
 }
+
+
+

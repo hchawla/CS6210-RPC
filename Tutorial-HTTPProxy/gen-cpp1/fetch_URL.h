@@ -10,7 +10,7 @@
 #include <thrift/TDispatchProcessor.h>
 #include "HTTPProxy_types.h"
 
-namespace HTTP_Proxy {
+namespace HTTP_ProxyServer {
 
 class fetch_URLIf {
  public:

@@ -6,7 +6,7 @@
  */
 #include "fetch_URL.h"
 
-namespace HTTP_Proxy {
+namespace HTTP_ProxyServer {
 
 uint32_t fetch_URL_get_args::read(::apache::thrift::protocol::TProtocol* iprot) {
 

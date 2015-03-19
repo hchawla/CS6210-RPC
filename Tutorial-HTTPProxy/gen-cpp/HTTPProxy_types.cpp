@@ -10,10 +10,10 @@
 
 namespace HTTP_Proxy {
 
-const char* HTTP_Proxy::ascii_fingerprint = "5EA2D527ECA3BA20C77AFC023EE8C05F";
-const uint8_t HTTP_Proxy::binary_fingerprint[16] = {0x5E,0xA2,0xD5,0x27,0xEC,0xA3,0xBA,0x20,0xC7,0x7A,0xFC,0x02,0x3E,0xE8,0xC0,0x5F};
+const char* HTTPProxy::ascii_fingerprint = "EEBC915CE44901401D881E6091423036";
+const uint8_t HTTPProxy::binary_fingerprint[16] = {0xEE,0xBC,0x91,0x5C,0xE4,0x49,0x01,0x40,0x1D,0x88,0x1E,0x60,0x91,0x42,0x30,0x36};
 
-uint32_t HTTP_Proxy::read(::apache::thrift::protocol::TProtocol* iprot) {
+uint32_t HTTPProxy::read(::apache::thrift::protocol::TProtocol* iprot) {
 
   uint32_t xfer = 0;
   std::string fname;
@@ -34,24 +34,17 @@ uint32_t HTTP_Proxy::read(::apache::thrift::protocol::TProtocol* iprot) {
     switch (fid)
     {
       case 1:
-        if (ftype == ::apache::thrift::protocol::T_MAP) {
-          {
-            this->URL.clear();
-            uint32_t _size0;
-            ::apache::thrift::protocol::TType _ktype1;
-            ::apache::thrift::protocol::TType _vtype2;
-            xfer += iprot->readMapBegin(_ktype1, _vtype2, _size0);
-            uint32_t _i4;
-            for (_i4 = 0; _i4 < _size0; ++_i4)
-            {
-              std::string _key5;
-              xfer += iprot->readString(_key5);
-              std::string& _val6 = this->URL[_key5];
-              xfer += iprot->readString(_val6);
-            }
-            xfer += iprot->readMapEnd();
-          }
-          this->__isset.URL = true;
+        if (ftype == ::apache::thrift::protocol::T_STRING) {
+          xfer += iprot->readBinary(this->document);
+          this->__isset.document = true;
+        } else {
+          xfer += iprot->skip(ftype);
+        }
+        break;
+      case 2:
+        if (ftype == ::apache::thrift::protocol::T_I32) {
+          xfer += iprot->readI32(this->result_code);
+          this->__isset.result_code = true;
         } else {
           xfer += iprot->skip(ftype);
         }
@@ -68,21 +61,16 @@ uint32_t HTTP_Proxy::read(::apache::thrift::protocol::TProtocol* iprot) {
   return xfer;
 }
 
-uint32_t HTTP_Proxy::write(::apache::thrift::protocol::TProtocol* oprot) const {
+uint32_t HTTPProxy::write(::apache::thrift::protocol::TProtocol* oprot) const {
   uint32_t xfer = 0;
-  xfer += oprot->writeStructBegin("HTTP_Proxy");
+  xfer += oprot->writeStructBegin("HTTPProxy");
 
-  xfer += oprot->writeFieldBegin("URL", ::apache::thrift::protocol::T_MAP, 1);
-  {
-    xfer += oprot->writeMapBegin(::apache::thrift::protocol::T_STRING, ::apache::thrift::protocol::T_STRING, static_cast<uint32_t>(this->URL.size()));
-    std::map<std::string, std::string> ::const_iterator _iter7;
-    for (_iter7 = this->URL.begin(); _iter7 != this->URL.end(); ++_iter7)
-    {
-      xfer += oprot->writeString(_iter7->first);
-      xfer += oprot->writeString(_iter7->second);
-    }
-    xfer += oprot->writeMapEnd();
-  }
+  xfer += oprot->writeFieldBegin("document", ::apache::thrift::protocol::T_STRING, 1);
+  xfer += oprot->writeBinary(this->document);
+  xfer += oprot->writeFieldEnd();
+
+  xfer += oprot->writeFieldBegin("result_code", ::apache::thrift::protocol::T_I32, 2);
+  xfer += oprot->writeI32(this->result_code);
   xfer += oprot->writeFieldEnd();
 
   xfer += oprot->writeFieldStop();
@@ -90,9 +78,10 @@ uint32_t HTTP_Proxy::write(::apache::thrift::protocol::TProtocol* oprot) const {
   return xfer;
 }
 
-void swap(HTTP_Proxy &a, HTTP_Proxy &b) {
+void swap(HTTPProxy &a, HTTPProxy &b) {
   using ::std::swap;
-  swap(a.URL, b.URL);
+  swap(a.document, b.document);
+  swap(a.result_code, b.result_code);
   swap(a.__isset, b.__isset);
 }
 
