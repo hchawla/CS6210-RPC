@@ -22,12 +22,20 @@ using boost::shared_ptr;
 using namespace  ::HTTP_Server;
 using namespace std;
 
+
 struct Priority_Queue
 {
 	string URL;
 	int32_t size;
 };
 
+class queue_Func {
+	public:
+	    bool operator()(Priority_Queue &q1, Priority_Queue &q2)
+	    {
+	       return (q1.size < q2.size);
+	    }
+};
 struct wd_in {
   size_t size;
   size_t len;
@@ -35,16 +43,7 @@ struct wd_in {
 };
 
 
-class queue_Func {
-	public:
-	    bool operator()(Priority_Queue &q1, Priority_Queue &q2)
-	    {
-	       if (q1.size < q2.size) return true;	       
-	       return false;
-	    }
-};
-
-
+double Cache_Size;
 class get_UrlHandler : virtual public get_UrlIf
 {
 	
@@ -55,24 +54,24 @@ class get_UrlHandler : virtual public get_UrlIf
 		int32_t index;
 		int32_t Cache_Hit;
 		int32_t run_policy;
-  		static const double Cache_Size = 1*1024*2;;
 		priority_queue < Priority_Queue, vector<Priority_Queue>, queue_Func> lsf_queue;
 	
 		get_UrlHandler()
 		{
 	    		// Your initialization goes here
+			cout<<"Cache Size has been set to: "<<Cache_Size<<"\n";
 			index=0;
 			Cache_Hit=0;
 	  	}
 		int32_t get_MapSize()
 		{
 			int32_t tot_size=0;
-			std::map<string,string>::iterator it;
-			for (it=URLMap.url_Body.begin(); it!=URLMap.url_Body.end(); ++it)
+			std::map<string,string>::iterator i;
+			for (i=URLMap.url_Body.begin(); i!=URLMap.url_Body.end(); ++i)
 			{
-  			tot_size += it->second.size();
+  			tot_size += i->second.size();
   			}
-			cout<<"Total Size of Map: "<<tot_size<<"\n";
+			//cout<<"Total Size of Map: "<<tot_size<<"\n";
   			return tot_size;  
 		}
 		void remove_fromCache(double remove_Size)
@@ -80,55 +79,52 @@ class get_UrlHandler : virtual public get_UrlIf
 			double free_Size=Cache_Size-get_MapSize();
 			if(run_policy==1)
 			{
-				cout<< "FIFO Cache Replacment.\n";
 				while(remove_Size>free_Size)
 				{
 				  	int32_t start;
-				  	std::map<int32_t, string>::iterator it = URL.begin();
-					start = it->first;  		
-					it = URL.find(start);
-					string keyURL = URL[start];
+				  	std::map<int32_t, string>::iterator i = URL.begin();
+					start = i->first;  		
+					i = URL.find(start);
+					string rem_URL = URL[start];
 				  	URL.erase(start);
-				  	URLMap.url_Body.erase(keyURL);
-				  	cout << "URL to be evicted is : " << keyURL << endl;
+				  	URLMap.url_Body.erase(rem_URL);
+				  	cout<<"URL to be removed is : "<<rem_URL<<"\n";
 					free_Size=Cache_Size-get_MapSize();
 				}
 				
 			}
 			if(run_policy==2)
 			{
-				cout<< "Random Cache Replacement.\n";
 				while(remove_Size>free_Size)
 				{
 					  	int32_t start, end, randNum;
-					  	std::map<int32_t, string>::iterator it = URL.begin();
-					  	start = it->first;
+					  	std::map<int32_t, string>::iterator i = URL.begin();
+					  	start = i->first;
 					  	end = index;
 					  	while(1)
 						{
 					  		srand(time(NULL));
 					  		randNum = rand() % end + start; 
-					  		it = URL.find(randNum);
-					  		if(it != URL.end())
+					  		i = URL.find(randNum);
+					  		if(i != URL.end())
 							{
 					  			break;
 							}
-					  	}  	
-					  	string keyURL = URL[randNum];
+					  	}
+					  	string rem_URL = URL[randNum];
 					  	URL.erase(randNum);
-					  	URLMap.url_Body.erase(keyURL);
-					  	cout << "URL to be evicted is : " << keyURL << endl;
+					  	URLMap.url_Body.erase(rem_URL);
+					  	cout<<"URL to be removed is : "<<rem_URL<<"\n";
 						free_Size=Cache_Size-get_MapSize();
 				}
 
 			}
 			if(run_policy==3)
 			{
-				cout<< "Largest Size First Cache Replacement.\n";
 				while(remove_Size>free_Size)
 				{
 					Priority_Queue node = lsf_queue.top();
-				 	cout << "URL to be evicted is : " << node.URL << "\n";
+				 	cout<<"URL to be removed is : "<<node.URL<<"\n";
 					URLMap.url_Body.erase(node.URL);
 				  	lsf_queue.pop();
 					free_Size=Cache_Size-get_MapSize();
@@ -158,32 +154,14 @@ class get_UrlHandler : virtual public get_UrlIf
 			memset(&wdi, 0, sizeof(wdi));
 			cout<<"\n\n\nRequested URL: "<<url<<"\n";
 			run_policy=policy;
-			cout<<"Run Policy: "<<policy<<"\n";
-			switch(policy)
-			{
-				case 1:
-					cout<<"FIFO.\n";
-					break;
-				case 2:
-					cout<<"Random.\n";
-					break;
-				case 3:
-					cout<<"Largest Size First.\n";
-					break;
-				default:
-					cout<<"Invalid Policy.\n";
-					break;
-			}
-			
-			map<string,string>::iterator it;
-			it= URLMap.url_Body.find(url);
-
-			if(it == URLMap.url_Body.end())
+			map<string,string>::iterator i;
+			i= URLMap.url_Body.find(url);
+			if(i == URLMap.url_Body.end())
 			{
 				cout<<"No entry found in Map. Cache Miss\n";
 				curl = curl_easy_init();
 
-  				if(NULL != curl)
+  				if(NULL != curl)			//Fetch page from URL.
 				{
 					wdi.size = 1024;
 					/* Check for malloc failure in real code. */
@@ -209,34 +187,43 @@ class get_UrlHandler : virtual public get_UrlIf
 				}
 
 
-				if(wdi.size>Cache_Size)
+				if(wdi.size>Cache_Size)			// If page size is greater than the Cache Size.
 				{
-					cout<<"Page Size is greater than Cache Size";
+					cout<<"Page Size is greater than Cache Size\n";
 				}
-				else
+				else					
 				{
 					double tot_size = (get_MapSize() + wdi.size);
-					if(tot_size> Cache_Size)
+					if(tot_size> Cache_Size)			//No Space in Cache. Replacement needed.
 					{
-						cout<<"Cache Limit exceeded. Replacement needs to be done.";
+						cout<<"Cache Limit exceeded. Replacement needs to be done.\n";
 						remove_fromCache(wdi.size);
 						URLMap.url_Body[url]= wdi.data;
 						if(policy ==1 || policy==2) //FIFO or Random
 						{
+							if(policy==1)
+							{
+								cout<<"Cache Policy: FIFO Eviction.\n";
+							}
+							else
+							{
+								cout<<"Cache Policy: Random Eviction.\n";
+							}
 							URL[index++]= url;
 						}
 						else if(policy==3)	//Largest Size
 						{
+							cout<<"Cache Policy: Largest Size First Eviction.";
 							Priority_Queue node;
 							node.URL= url;
 							string body = URLMap.url_Body[url];
 							node.size= body.size();
-							cout<<"URL: "<<url<<"has size: "<<node.size<<"\n";
+							cout<<"URL: "<<url<<" has size: "<<node.size<<"\n";
 							lsf_queue.push(node);
 							cout<<"URL inserted in the Cache";
 						}
 					}
-					else
+					else			//Space available in Cache.
 					{
 						cout<<"Space available in Cache. No replacement required.\n";
 						URLMap.url_Body[url]= wdi.data;
@@ -251,7 +238,7 @@ class get_UrlHandler : virtual public get_UrlIf
 							node.URL= url;
 							string body = URLMap.url_Body[url];
 							node.size= body.size();
-							cout<<"URL: "<<url<<"has size: "<<node.size<<"\n";
+							cout<<"URL: "<<url<<" has size: "<<node.size<<"\n";
 							lsf_queue.push(node);
 							cout<<"URL inserted in the Cache\n";	
 						}
@@ -265,25 +252,34 @@ class get_UrlHandler : virtual public get_UrlIf
 				//write(STDOUT_FILENO, wdi.data, wdi.len);
 				/* cleanup wdi.data buffer. */
 				free(wdi.data);			    
-				cout << "No. of elements in cache: " << URLMap.url_Body.size() << "\n";
-			    	cout << "Size of cache: " << get_MapSize() << "\n";
-		            	cout << "Cache hits: " <<Cache_Hit <<"\n";
+
 			}
 			else
 			{
+				Cache_Hit++;	
 				cout<<"Entry found in Cache. Cache Hit\n";
+				cout << "Cache Hits: " <<Cache_Hit <<"\n";
 				_return= URLMap.url_Body[url];
-				Cache_Hit++;
-				cout << "No. of elements in cache: " << URLMap.url_Body.size() << "\n";
-			    	cout << "Size of cache: " << get_MapSize() << "\n";
-		            	cout << "Cache hits: " <<Cache_Hit <<"\n";	
 			}
+			cout << "Cache Elements: " << URLMap.url_Body.size() << "\n";
+			cout << "Size of Cache: " << get_MapSize() << "\n";
 		}
 
 };
 
 int main(int argc, char **argv)
 {
+	// Check the number of parameters
+    	if (argc < 2)
+	{
+		// Tell the user how to run the program
+		cerr << "Usage: " << argv[0] << " Cache_Size" << endl;
+		/* "Usage messages" are a conventional way of telling the user
+		 * how to run a program if they enter the command incorrectly.
+		 */
+		return 1;
+    	}
+	Cache_Size=atof(argv[1]);
 	int port = 9090;
 	shared_ptr<get_UrlHandler> handler(new get_UrlHandler());
 	shared_ptr<TProcessor> processor(new get_UrlProcessor(handler));
