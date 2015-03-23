@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 	struct timeval startTime, endTime;
 	double totalTime=0;
 	int count;
-	ifstream myfile ("random_list.txt");
+	ifstream myfile ("URLS/random_list.txt");
 	get_UrlClient client(protocol);
 	transport->open();
 	if(access==1)
@@ -76,7 +76,6 @@ int main(int argc, char **argv)
 		    	{
 				url_list.push_back(line);
 		    	}
-			int i=0;
 			while(count<runs)
 			{
 				size_t index = rand_r(&randseed)%url_list.size();

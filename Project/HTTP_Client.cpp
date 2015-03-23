@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 	struct timeval startTime, endTime;
 	double totalTime=0;
 	int count;
-	ifstream myfile ("random_list.txt");
+	ifstream myfile ("URLS/Alexatop.txt");
 	get_UrlClient client(protocol);
 	transport->open();
 	if(access==1)
