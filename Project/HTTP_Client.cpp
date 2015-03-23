@@ -34,33 +34,65 @@ int main(int argc, char **argv)
 	shared_ptr<TSocket> socket(new TSocket("localhost", 9090));
   	shared_ptr<TTransport> transport(new TBufferedTransport(socket));
   	shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
-
-  	string body,line;
-  	struct timeval startTime, endTime;
-  	double totalTime=0;
-  	ifstream myfile ("random_list.txt");
+	string body,line;
+	struct timeval startTime, endTime;
+	double totalTime=0;
+	int count;
+	ifstream myfile ("random_list.txt");
 	get_UrlClient client(protocol);
 	transport->open();
-	int count=0;
-	if (myfile.is_open())
-  	{
-    		while ( getline (myfile,line) )
-    		{ 
-			count++;
-			gettimeofday(&startTime, NULL);
-			client.get(body, line,policy);
-			gettimeofday(&endTime, NULL);
-			totalTime += ((endTime.tv_sec - startTime.tv_sec) + ((endTime.tv_usec - startTime.tv_usec)/1000000.0));
-		        cout << "Time taken for URL " << line<< " to fetch body is " << totalTime*1000<<" milliseconds.\n";
-    		}
-    		if(count==0)
-			cout<<"No input URL in file url.txt"<<endl;
-    		else
-			cout<< "Average time to fetch page of the URLS is : "<< (totalTime/count*1.0)<<" seconds"<<endl;
+	if(access==1)
+	{
+		count=0;
+		if (myfile.is_open())
+	  	{
+	    		while ( getline (myfile,line) &&count<runs)
+	    		{
+				count++;
+				gettimeofday(&startTime, NULL);
+				client.get(body, line,policy);
+				gettimeofday(&endTime, NULL);
+				totalTime += ((endTime.tv_sec - startTime.tv_sec) + ((endTime.tv_usec - startTime.tv_usec)/1000000.0));
+				cout<<"URL: "<<line<<" Time Taken: "<<totalTime*1000<<" milliseconds.\n";
+	    		}
+	    		if(count==0)
+				cout<<"No Input Provided.\n";
+	    		else
+				cout<< "Average time to fetch page of the URLS is : "<< (totalTime/count*1.0)<<" seconds\n";
+	    		myfile.close();
+	  	}
+	  	else
+		{
+			cout << "Unable to open file";
+		}
+	}
+	else if(access==2)
+	{
+		unsigned int randseed = time(NULL);
+		if (myfile.is_open())
+	  	{
+			std::vector<std::string> url_list;
+		    	while ( getline (myfile,line))
+		    	{
+				url_list.push_back(line);
+		    	}
+			while(count<runs)
+			{
+				size_t index = rand_r(&randseed)%url_list.size();
+				gettimeofday(&startTime, NULL);
+				client.get(body,url_list[index],policy);
+				gettimeofday(&endTime, NULL);
+				totalTime += ((endTime.tv_sec - startTime.tv_sec) + ((endTime.tv_usec - startTime.tv_usec)/1000000.0));
+				cout<<"URL: "<<url_list[index]<<" Time Taken: "<<totalTime*1000<<" milliseconds.\n";
+				count++;
+			}
+			if(count==0)
+				cout<<"No Input Provided.\n";
+	    		else
+				cout<< "Average time to fetch page of the URLS is : "<< (totalTime/count*1.0)<<" seconds\n";
+		}
     		myfile.close();
-  	}
-  	else
-		cout << "Unable to open file";
+	}
 	transport->close();
   	return 0;
 }

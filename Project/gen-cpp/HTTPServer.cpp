@@ -213,14 +213,14 @@ class get_UrlHandler : virtual public get_UrlIf
 						}
 						else if(policy==3)	//Largest Size
 						{
-							cout<<"Cache Policy: Largest Size First Eviction.";
+							cout<<"Cache Policy: Largest Size First Eviction.\n";
 							Priority_Queue node;
 							node.URL= url;
 							string body = URLMap.url_Body[url];
 							node.size= body.size();
 							cout<<"URL: "<<url<<" has size: "<<node.size<<"\n";
 							lsf_queue.push(node);
-							cout<<"URL inserted in the Cache";
+							cout<<"URL inserted in the Cache\n";
 						}
 					}
 					else			//Space available in Cache.
