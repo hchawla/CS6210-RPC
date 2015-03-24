@@ -19,15 +19,15 @@ using namespace ::HTTP_Server;
 
 int main(int argc, char **argv)
 {
-    	if (argc < 3)
+    if (argc < 3)
 	{
 		// Tell the user how to run the program
-		cerr<<"Usage: "<<argv[0]<<" Cache-Policy(1:FIFO 2:Random 3:Largest Size First) URL-Access-Pattern(1:Linear Run-Through 2:Random Run-Through) Number-of-URLS"<<"\n";
+		cerr<<"Usage: "<<argv[0]<<" Cache-Policy(1:FIFO 2:Random 3:Largest Size First) URL-Access-Pattern(1:Linear Run-Through 2:Random Run-Through 3:Real-world Run-Through) Number-of-URLS"<<"\n";
 		/* "Usage messages" are a conventional way of telling the user
 		 * how to run a program if they enter the command incorrectly.
 		 */
 		return 1;
-    	}
+    }
 	int policy=atoi(argv[1]);
 	int access=atoi(argv[2]);
 	int runs=atoi(argv[3]);
@@ -46,20 +46,20 @@ int main(int argc, char **argv)
 		count=0;
 		if (myfile.is_open())
 	  	{
-	    		while ( getline (myfile,line) &&count<runs)
-	    		{
+    		while ( getline (myfile,line) &&count<runs)
+    		{
 				count++;
 				gettimeofday(&startTime, NULL);
 				client.get(body, line,policy);
 				gettimeofday(&endTime, NULL);
 				totalTime += ((endTime.tv_sec - startTime.tv_sec) + ((endTime.tv_usec - startTime.tv_usec)/1000000.0));
 				cout<<"URL: "<<line<<" Time Taken: "<<totalTime*1000<<" milliseconds.\n";
-	    		}
-	    		if(count==0)
+    		}
+    		if(count==0)
 				cout<<"No Input Provided.\n";
-	    		else
+    		else
 				cout<< "Average time to fetch page of the URLS is : "<< (totalTime/count*1.0)<<" seconds\n";
-	    		myfile.close();
+    		myfile.close();
 	  	}
 	  	else
 		{
@@ -72,10 +72,10 @@ int main(int argc, char **argv)
 		if (myfile.is_open())
 	  	{
 			std::vector<std::string> url_list;
-		    	while ( getline (myfile,line))
-		    	{
+	    	while ( getline (myfile,line))
+	    	{
 				url_list.push_back(line);
-		    	}
+	    	}
 			while(count<runs)
 			{
 				size_t index = rand_r(&randseed)%url_list.size();
@@ -88,10 +88,79 @@ int main(int argc, char **argv)
 			}
 			if(count==0)
 				cout<<"No Input Provided.\n";
-	    		else
+    		else
 				cout<< "Average time to fetch page of the URLS is : "<< (totalTime/count*1.0)<<" seconds\n";
+			myfile.close();
 		}
-    		myfile.close();
+		else
+		{
+			cout << "Unable to open file";
+		}
+	}
+
+	//Access policy replicating close to real-world usage (1 2 3 4 5 1 2 6 7 8 1 2 9 10 11 1 2 .......)
+	else if(access==3)
+	{
+		int common, index, sparse;
+		common = 0;
+		sparse = 0;
+		index = 0;
+
+		if (myfile.is_open())
+	  	{
+			std::vector<std::string> url_list;
+	    	while ( getline (myfile,line))
+	    	{
+				url_list.push_back(line);
+	    	}
+			while(count<runs)
+			{
+				size_t index = rand_r(&randseed)%url_list.size();
+				gettimeofday(&startTime, NULL);
+				client.get(body,url_list[index],policy);
+				gettimeofday(&endTime, NULL);
+				totalTime += ((endTime.tv_sec - startTime.tv_sec) + ((endTime.tv_usec - startTime.tv_usec)/1000000.0));
+				cout<<"URL: "<<url_list[index]<<" Time Taken: "<<totalTime*1000<<" milliseconds.\n";
+				count++;				
+
+				if(count % 5 == 0) {
+					common = 0;
+					index = 0;
+				}
+				else {
+					if (common = 0) {
+						index = 1;
+						common = 1;
+					}
+					else if (common == 1) {
+						if (sparse < 1)
+						{
+							sparse += 2;
+						}
+						else {
+							sparse += 1;
+						}
+						index = sparse;
+						common = 2;
+					}
+					else {
+						sparse += 1;
+						index = sparse;
+					}
+				}
+
+			}
+			if(count==0)
+				cout<<"No Input Provided.\n";
+    		else
+				cout<< "Average time to fetch page of the URLS is : "<< (totalTime/count*1.0)<<" seconds\n";
+			myfile.close();
+		}
+		else
+		{
+			cout << "Unable to open file";
+		}
+
 	}
 	transport->close();
   	return 0;
