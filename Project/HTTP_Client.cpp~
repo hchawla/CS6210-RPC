@@ -38,7 +38,7 @@ int main(int argc, char **argv)
 	struct timeval startTime, endTime;
 	double totalTime=0;
 	int count;
-	ifstream myfile ("URLS/random_list.txt");
+	ifstream myfile ("URLS/Alexatop.txt");
 	get_UrlClient client(protocol);
 	transport->open();
 	if(access==1)
@@ -49,10 +49,10 @@ int main(int argc, char **argv)
 	    		while ( getline (myfile,line) &&count<runs)
 	    		{
 				count++;
-				gettimeofday(&startTime, NULL);
+				gettimeofday(&start, NULL);
 				client.get(body, line,policy);
-				gettimeofday(&endTime, NULL);
-				totalTime += ((endTime.tv_sec - startTime.tv_sec) + ((endTime.tv_usec - startTime.tv_usec)/1000000.0));
+				gettimeofday(&end, NULL);
+				totalTime=(end.tv_sec * 1000000 + end.tv_usec)- (start.tv_sec * 1000000 + start.tv_usec);
 				cout<<"URL: "<<line<<" Time Taken: "<<totalTime*1000<<" milliseconds.\n";
 	    		}
 	    		if(count==0)
@@ -79,10 +79,10 @@ int main(int argc, char **argv)
 			while(count<runs)
 			{
 				size_t index = rand_r(&randseed)%url_list.size();
-				gettimeofday(&startTime, NULL);
+				gettimeofday(&start, NULL);
 				client.get(body,url_list[index],policy);
-				gettimeofday(&endTime, NULL);
-				totalTime += ((endTime.tv_sec - startTime.tv_sec) + ((endTime.tv_usec - startTime.tv_usec)/1000000.0));
+				gettimeofday(&end, NULL);
+				totalTime=(end.tv_sec * 1000000 + end.tv_usec)- (start.tv_sec * 1000000 + start.tv_usec);
 				cout<<"URL: "<<url_list[index]<<" Time Taken: "<<totalTime*1000<<" milliseconds.\n";
 				count++;
 			}
