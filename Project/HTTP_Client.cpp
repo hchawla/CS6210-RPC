@@ -101,10 +101,10 @@ int main(int argc, char **argv)
 	//Access policy replicating close to real-world usage (1 2 3 4 5 1 2 6 7 8 1 2 9 10 11 1 2 .......)
 	else if(access==3)
 	{
-		int common, index, sparse;
+		int common, sparse;
+		unsigned int randseed = time(NULL);
 		common = 0;
 		sparse = 0;
-		index = 0;
 
 		if (myfile.is_open())
 	  	{
@@ -116,10 +116,10 @@ int main(int argc, char **argv)
 			while(count<runs)
 			{
 				size_t index = rand_r(&randseed)%url_list.size();
-				gettimeofday(&startTime, NULL);
+				gettimeofday(&start, NULL);
 				client.get(body,url_list[index],policy);
-				gettimeofday(&endTime, NULL);
-				totalTime += ((endTime.tv_sec - startTime.tv_sec) + ((endTime.tv_usec - startTime.tv_usec)/1000000.0));
+				gettimeofday(&end, NULL);
+				totalTime += ((end.tv_sec - start.tv_sec) + ((end.tv_usec - start.tv_usec)/1000000.0));
 				cout<<"URL: "<<url_list[index]<<" Time Taken: "<<totalTime*1000<<" milliseconds.\n";
 				count++;				
 
@@ -128,7 +128,7 @@ int main(int argc, char **argv)
 					index = 0;
 				}
 				else {
-					if (common = 0) {
+					if (common == 0) {
 						index = 1;
 						common = 1;
 					}
