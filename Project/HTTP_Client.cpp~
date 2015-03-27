@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     if (argc < 3)
 	{
 		// Tell the user how to run the program
-		cerr<<"Usage: "<<argv[0]<<" Cache-Policy(1:FIFO 2:Random 3:Largest Size First) URL-Access-Pattern(1:Linear Run-Through 2:Random Run-Through 3:Real-world Run-Through) Number-of-URLS"<<"\n";
+		cerr<<"Usage: "<<argv[0]<<" Cache-Policy(1:FIFO 2:Random 3:Largest Size First) URL-Access-Pattern(1:Linear Run-Through 2:Random Run-Through 3:Real-World Static Run-Through 4:Real-World Probabilistic Run-Through) Number-of-URLS"<<"\n";
 		/* "Usage messages" are a conventional way of telling the user
 		 * how to run a program if they enter the command incorrectly.
 		 */
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 		unsigned int randseed = time(NULL);
 		if (myfile.is_open())
 	  	{
-			std::vector<std::string> url_list;
+			vector<string> url_list;
 	    	while ( getline (myfile,line))
 	    	{
 				url_list.push_back(line);
@@ -101,27 +101,26 @@ int main(int argc, char **argv)
 	//Access policy replicating close to real-world usage (1 2 3 4 5 1 2 6 7 8 1 2 9 10 11 1 2 .......)
 	else if(access==3)
 	{
-		int common, sparse;
-		unsigned int randseed = time(NULL);
+		int common, sparse, index;
 		common = 0;
 		sparse = 0;
 		index = 0;
 
 		if (myfile.is_open())
 	  	{
-			std::vector<std::string> url_list;
+			vector<string> url_list;
 	    	while ( getline (myfile,line))
 	    	{
 				url_list.push_back(line);
 	    	}
 			while(count<runs)
 			{
-				size_t index = rand_r(&randseed)%url_list.size();
+				//size_t index = rand_r(&randseed)%url_list.size();
 				gettimeofday(&start, NULL);
 				client.get(body,url_list[index],policy);
 				gettimeofday(&end, NULL);
 				totalTime += ((end.tv_sec - start.tv_sec) + ((end.tv_usec - start.tv_usec)/1000000.0));
-				cout<<"URL: "<<url_list[index]<<" Time Taken: "<<totalTime*1000<<" milliseconds.\n";
+				cout<<"URL: "<<url_list[index]<<" Time Taken: "<<totalTime<<" milliseconds.\n";
 				count++;				
 
 				if(count % 5 == 0) {
@@ -150,6 +149,50 @@ int main(int argc, char **argv)
 					}
 				}
 
+			}
+			if(count==0)
+				cout<<"No Input Provided.\n";
+    		else
+				cout<< "Average time to fetch page of the URLS is : "<< (totalTime/count*1.0)<<" seconds\n";
+			myfile.close();
+		}
+		else
+		{
+			cout << "Unable to open file";
+		}
+
+	}
+
+	//Access policy replicating close to real-world usage with randomness.
+	//>60% of the time one of the first 10 urls (Frequently visited urls) in the url list will be accessed.
+	//<40% of the time, a new page will be accessed.
+	else if(access==4)
+	{
+		unsigned int randseed = time(NULL);
+		size_t index;
+		
+		if (myfile.is_open())
+	  	{
+			vector<string> url_list;
+	    	while ( getline (myfile,line))
+	    	{
+				url_list.push_back(line);
+	    	}
+			while(count<runs)
+			{
+				int coin = rand_r(&randseed)%100;
+				if (coin <= 60) {
+					index = rand_r(&randseed)%10;
+				}
+				else {
+					index = rand_r(&randseed)%url_list.size();
+				}				
+				gettimeofday(&start, NULL);
+				client.get(body,url_list[index],policy);
+				gettimeofday(&end, NULL);
+				totalTime += ((end.tv_sec - start.tv_sec) + ((end.tv_usec - start.tv_usec)/1000000.0));
+				cout<<"URL: "<<url_list[index]<<" Time Taken: "<<totalTime*1000<<" milliseconds.\n";
+				count++;				
 			}
 			if(count==0)
 				cout<<"No Input Provided.\n";

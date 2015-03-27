@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     if (argc < 3)
 	{
 		// Tell the user how to run the program
-		cerr<<"Usage: "<<argv[0]<<" Cache-Policy(1:FIFO 2:Random 3:Largest Size First) URL-Access-Pattern(1:Linear Run-Through 2:Random Run-Through 3:Real-world static Run-Through 4:Real-world probabilistic Run-Through) Number-of-URLS"<<"\n";
+		cerr<<"Usage: "<<argv[0]<<" Cache-Policy(1:FIFO 2:Random 3:Largest Size First) URL-Access-Pattern(1:Linear Run-Through 2:Random Run-Through 3:Real-World Static Run-Through 4:Real-World Probabilistic Run-Through) Number-of-URLS"<<"\n";
 		/* "Usage messages" are a conventional way of telling the user
 		 * how to run a program if they enter the command incorrectly.
 		 */
@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 		unsigned int randseed = time(NULL);
 		if (myfile.is_open())
 	  	{
-			std::vector<std::string> url_list;
+			vector<string> url_list;
 	    	while ( getline (myfile,line))
 	    	{
 				url_list.push_back(line);
@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 
 		if (myfile.is_open())
 	  	{
-			std::vector<std::string> url_list;
+			vector<string> url_list;
 	    	while ( getline (myfile,line))
 	    	{
 				url_list.push_back(line);
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
 				client.get(body,url_list[index],policy);
 				gettimeofday(&end, NULL);
 				totalTime += ((end.tv_sec - start.tv_sec) + ((end.tv_usec - start.tv_usec)/1000000.0));
-				cout<<"URL: "<<url_list[index]<<" Time Taken: "<<totalTime*1000<<" milliseconds.\n";
+				cout<<"URL: "<<url_list[index]<<" Time Taken: "<<totalTime<<" milliseconds.\n";
 				count++;				
 
 				if(count % 5 == 0) {
@@ -153,7 +153,7 @@ int main(int argc, char **argv)
 			if(count==0)
 				cout<<"No Input Provided.\n";
     		else
-				cout<< "Average time to fetch page of the URLS is : "<< (totalTime/count*1.0)<<" seconds\n";
+				cout<< "Average time to fetch page of the URLS is : "<< (totalTime/count*1.0)<<" milliseconds\n";
 			myfile.close();
 		}
 		else
@@ -173,7 +173,7 @@ int main(int argc, char **argv)
 		
 		if (myfile.is_open())
 	  	{
-			std::vector<std::string> url_list;
+			vector<string> url_list;
 	    	while ( getline (myfile,line))
 	    	{
 				url_list.push_back(line);

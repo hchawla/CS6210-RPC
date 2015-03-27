@@ -66,7 +66,7 @@ class get_UrlHandler : virtual public get_UrlIf
 		int32_t get_MapSize()
 		{
 			int32_t tot_size=0;
-			std::map<string,string>::iterator i;
+			map<string,string>::iterator i;
 			for (i=URLMap.url_Body.begin(); i!=URLMap.url_Body.end(); ++i)
 			{
   			tot_size += i->second.size();
@@ -82,7 +82,7 @@ class get_UrlHandler : virtual public get_UrlIf
 				while(remove_Size>free_Size)
 				{
 				  	int32_t start;
-				  	std::map<int32_t, string>::iterator i = URL.begin();
+				  	map<int32_t, string>::iterator i = URL.begin();
 					start = i->first;  		
 					i = URL.find(start);
 					string rem_URL = URL[start];
@@ -98,7 +98,7 @@ class get_UrlHandler : virtual public get_UrlIf
 				while(remove_Size>free_Size)
 				{
 					  	int32_t start, end, randNum;
-					  	std::map<int32_t, string>::iterator i = URL.begin();
+					  	map<int32_t, string>::iterator i = URL.begin();
 					  	start = i->first;
 					  	end = index;
 					  	while(1)
@@ -199,16 +199,14 @@ class get_UrlHandler : virtual public get_UrlIf
 						cout<<"Cache Limit exceeded. Replacement needs to be done.\n";
 						remove_fromCache(wdi.size);
 						URLMap.url_Body[url]= wdi.data;
-						if(policy ==1 || policy==2) //FIFO or Random
+						if(policy ==1) //FIFO
 						{
-							if(policy==1)
-							{
-								cout<<"Cache Policy: FIFO Eviction.\n";
-							}
-							else
-							{
-								cout<<"Cache Policy: Random Eviction.\n";
-							}
+							cout<<"Cache Policy: FIFO Eviction.\n";
+							URL[index++]= url;
+						}
+						else if(policy==2) //Random
+						{
+							cout<<"Cache Policy: Random Eviction.\n";
 							URL[index++]= url;
 						}
 						else if(policy==3)	//Largest Size
@@ -218,9 +216,7 @@ class get_UrlHandler : virtual public get_UrlIf
 							node.URL= url;
 							string body = URLMap.url_Body[url];
 							node.size= body.size();
-							cout<<"URL: "<<url<<" has size: "<<node.size<<"\n";
 							lsf_queue.push(node);
-							cout<<"URL inserted in the Cache\n";
 						}
 					}
 					else			//Space available in Cache.
@@ -230,7 +226,7 @@ class get_UrlHandler : virtual public get_UrlIf
 						if(policy==1 || policy==2)
 						{
 							URL[index++]=url;
-							cout<<"Inserted into Map\n";
+							cout<<"Inserted into Map.\n";
 						}
 						else if(policy==3)
 						{
@@ -238,9 +234,8 @@ class get_UrlHandler : virtual public get_UrlIf
 							node.URL= url;
 							string body = URLMap.url_Body[url];
 							node.size= body.size();
-							cout<<"URL: "<<url<<" has size: "<<node.size<<"\n";
 							lsf_queue.push(node);
-							cout<<"URL inserted in the Cache\n";	
+							cout<<"Inserted into Queue.\n";	
 						}
 					}
 				}
