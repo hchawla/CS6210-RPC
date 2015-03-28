@@ -1,0 +1,24 @@
+THRIFT_DIR = usr/include/thrift
+INCS_DIRS  =-I/usr/include/thrift
+LIBS_DIRS  =-L/usr/local/lib
+CPP_DEFS   =-DHAVE_NETINT_IN_H -DHAVE_INITTYPES_H
+CPP_OPTS   =-Wall -O2 -fpermissive
+LIBS       =-lthrift -lcurl
+
+GEN_SRC    = gen-cpp/get_Url.cpp  \
+             gen-cpp/ProxyServer_types.cpp   \
+             gen-cpp/ProxyServer_constants.cpp \
+             gen-cpp/HTTPServer.cpp
+	     HTTP_Client.cpp
+GEN_INC    = -I../gen-cpp
+
+default: HTTPServer HTTP_Client
+
+server: HTTPServer.cpp
+    g++ ${CPP_OPTS} ${CPP_DEFS} -o HTTPServer ${GEN_INC} ${INCS_DIRS} HTTPServer.cpp ${GEN_SRC} ${LIBS_DIRS} ${LIBS}
+
+client: HTTP_Client.cpp
+    g++ ${CPP_OPTS} ${CPP_DEFS} -o CppClient ${GEN_INC} ${INCS_DIRS} CppClient.cpp ${GEN_SRC} ${LIBS_DIRS} ${LIBS}
+
+clean:
+    $(RM) -r CppClient CppServer

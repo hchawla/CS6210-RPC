@@ -253,10 +253,10 @@ class get_UrlHandler : virtual public get_UrlIf
 			{
 				Cache_Hit++;	
 				cout<<"Entry found in Cache. Cache Hit\n";
-				cout << "Cache Hits: " <<Cache_Hit <<"\n";
 				_return= URLMap.url_Body[url];
 			}
 			cout << "Cache Elements: " << URLMap.url_Body.size() << "\n";
+			cout << "Cache Hits: " <<Cache_Hit <<"\n";
 			cout << "Size of Cache: " << get_MapSize() << "\n";
 		}
 
